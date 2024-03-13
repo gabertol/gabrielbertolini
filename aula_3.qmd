@@ -1,0 +1,834 @@
+---
+title: "3-Gráficos com ggplot2"
+---
+
+# Aula 3
+
+Dr. Gabriel Bertolini
+
+2º semestre 2023 - PPGGEO UFRGS
+
+Oficina de programação.
+
+Aula introdutória sobre gráficos com ggplot.
+
+## Instalar pacotes
+
+```{r}
+#install.packages("ggtern")
+#install.packages("patchwork")
+#install.packages("tidypaleo")
+```
+
+## Importar biblioteca
+
+```{r,echo=FALSE}
+library(dplyr)  # biblioteca do tidyverse de manipulação de banco de dados
+library(tidyr)  # biblioteca do tidyverse para transformar banco de dados
+library(ggtern) # biblioteca que adiciona o gráfico ternário ao ggplot (evitar importar ggplot2 ao importar ggtern)
+library(forcats) # biblioteca do tidyverse para lidar com fatores
+library(patchwork) # biblioteca para organizar gráficos em um layout
+library(tidypaleo) # biblioteca para plots estratigráficos
+library(RColorBrewer) # biblioteca de paleta de cores
+# Bibliotecas espaciais
+library(sf) # biblioteca para criação de objetos espaciais
+library(mapview) # biblioteca para visualização interativa de dados espaciais
+library(geobr)
+library(ggspatial)
+library(ggdal)
+```
+
+## Importar os bancos
+
+Banco obtido em @bonin2020 .
+
+```{r,warning=FALSE}
+BD<-read.csv("./data/geoquimica_granito.csv") %>%
+    as_tibble()
+
+```
+
+Banco obtido em @bertolini2020
+
+```{r,warning=FALSE}
+lvsd<-read.csv("./data/lvsd.csv") %>%
+    as_tibble()
+```
+
+## Gráficos ggplot2
+
+### Scatterplot
+
+```{r,warning=FALSE}
+PLOT1<-BD %>%
+  select(SiO2,TiO2) %>%
+  ggplot(aes(x=TiO2,y=SiO2))+
+  #parametro aes()=aestetic para parametro 
+  #relacionado ao banco de dado (coluna)
+  geom_point(size=2)+
+  #tipo de elemento gráfico a ser usado,
+  #no caso pontos
+  scale_x_log10()
+  #parametro adicionado para usar
+  #escala log10 no eixo x
+
+plotly::ggplotly(PLOT1)
+
+```
+
+Aqui, vamos fazer um gráfico de dispersão utilizando diferentes transparencias, adicionadas com função mutate e criação da coluna transp. Notar uso do aes() para mapear o banco de dados.
+
+```{r,warning=FALSE,fig.height=8}
+BD %>%
+  select(SiO2,TiO2,MgO,Tectonic_setting) %>%
+  mutate(transp=ifelse(Tectonic_setting=="CONTINENTAL FLOOD BASALT",0.8,0.3)) %>%
+  ggplot(aes(x=SiO2,y=TiO2,size=MgO,color=Tectonic_setting))+
+  #geom_point(alpha=0.5) # Parametro alpha para transparência
+  geom_point(aes(alpha=transp))
+
+
+```
+
+A função ggsave() pode salvar o plot.
+
+```{r,warning=FALSE}
+#ggsave("./plots/plot1.jpg")
+```
+
+Plot múltiplos com facet_wrap()
+
+```{r,warning=FALSE,fig.height=8,fig.width=8}
+BD %>%
+  select(SiO2,TiO2,MgO,Tectonic_setting) %>%
+  ggplot(aes(x=SiO2,y=TiO2,size=MgO,col=Tectonic_setting))+
+  geom_point()+
+  labs(x="Óxido de Silicio",
+       y="Óxido de Titânio",
+       size="Proporção de Magnésio",
+       col="Ambiente tectonico",
+       title = " Relação entre Silicio e Titânio em diferentes ambientes geotectônicos")+
+  facet_wrap(~Tectonic_setting)
+
+```
+
+ou facet_grid()
+
+```{r,warning=FALSE,fig.height=10,fig.width=8}
+BD %>% 
+  select(SiO2,TiO2,MgO,Tectonic_setting,TASMiddlemostPlut,SubGroup) %>%
+  filter(Tectonic_setting=="ARCHAEAN CRATONS") %>% 
+  ggplot(aes(x=SiO2,y=TiO2,col=SubGroup))+
+  geom_point()+ 
+  facet_grid(TASMiddlemostPlut~SubGroup)
+```
+
+### Exercício 1
+
+Qual a distribuição das séries de granitos utilizando o diagrama P-Q (Debon & Fort, 1983, 1988)
+
+P = K - (Na + Ca)
+
+Q = Si/3 - (K + Na + 2\*(Ca/3))
+
+P vs Q
+
+1.  Fazer gráfico de dispersão P vs. Q no banco dos granitos
+
+```{r,warning=FALSE,fig.height=6}
+BD %>% select(K=K2O,Na=Na2O,Si=SiO2,Ca=CaO,SubGroup) %>%
+       mutate(P = K - (Na + Ca),
+              Q = Si/3 - (K + Na + 2*(Ca/3))) %>%
+      ggplot(aes(P,Q,col=SubGroup))+
+      geom_point()+
+      geom_smooth(method="lm")
+
+```
+
+2.  Criar vários plots pela coluna SubGroup.
+
+```{r,warning=FALSE,fig.width=10,fig.height=8}
+BD %>% select(K=K2O,Na=Na2O,Si=SiO2,Ca=CaO,SubGroup) %>%
+       mutate(P = K - (Na + Ca),
+              Q = Si/3 - (K + Na + 2*(Ca/3))) %>%
+       ggplot(aes(P,Q,col=SubGroup))+
+       geom_point()+
+       geom_smooth(method="lm",col="black")+
+       facet_wrap(~SubGroup)
+```
+
+### Boxplot
+
+```{r,warning=FALSE}
+BD %>%
+    select(SiO2, TiO2, MgO, Tectonic_setting) %>%
+    ggplot(aes(x = Tectonic_setting, y = TiO2, fill = Tectonic_setting)) +
+    geom_boxplot()+
+    theme(axis.title.x=element_blank(), # retirar nome escala
+          axis.text.x=element_blank(), # retirar texto escala
+          axis.ticks.x=element_blank()) # retirar ticks escala
+```
+
+Ou, versão violino
+
+```{r,warning=FALSE}
+BD %>%
+    select(SiO2, TiO2, MgO, Tectonic_setting) %>%
+    ggplot(aes(x = Tectonic_setting, y = TiO2, fill = Tectonic_setting)) +
+    geom_violin()+
+    theme(axis.title.x=element_blank(), # retirar nome escala
+          axis.text.x=element_blank(), # retirar texto escala
+          axis.ticks.x=element_blank()) # retirar ticks escala
+```
+
+### Histograma
+
+```{r, warning=FALSE}
+BD %>% select(SiO2,TiO2,MgO,Tectonic_setting) %>%
+       ggplot(aes(x=SiO2))+
+       geom_histogram(bins=10)+
+       geom_vline(aes(xintercept=mean(SiO2)))+ # Adiciona média
+       geom_vline(col="red",aes(xintercept=median(SiO2))) # adiciona mediana
+
+
+histo_ploter <- function(df,bins = 10) {
+  
+  df %>%
+    ggplot(aes(x = SiO2) ) +
+    geom_histogram(bins = bins) +
+    geom_vline(aes(xintercept = mean(SiO2))) +
+    geom_vline(col = "red", aes(xintercept = median(SiO2)))
+}
+
+histo_ploter(BD,5)
+
+plotly::ggplotly(histo_ploter(BD))
+```
+
+Histograma pivotado
+
+```{r,warning=FALSE}
+BD %>%
+  select(SiO2:P2O5) %>%
+  mutate(across(.cols = SiO2:P2O5, as.numeric)) %>%
+  pivot_longer(cols = SiO2:P2O5,
+               names_to = "element",
+               values_to = "values") %>%
+  group_by(element) %>%
+  mutate(media = median(values, na.rm = TRUE)) %>%
+  ungroup() %>%
+  ggplot(aes(values)) +
+  geom_histogram() +
+  geom_vline(col = "red", aes(xintercept = media)) +
+  facet_wrap( ~ element, scales = "free")
+```
+
+### Densidade
+
+```{r,warning=FALSE}
+BD %>%
+  select(SiO2, Tectonic_setting) %>%
+  ggplot(aes(x = SiO2, fill = Tectonic_setting)) +
+  geom_density(bw=1, #tamanho da banda
+               alpha = 0.6) +
+  facet_wrap( ~ Tectonic_setting)+
+  labs(fill="Ambiente\nTectônico")
+```
+
+### Ternário
+
+simples
+
+```{r,warning=FALSE}
+BD %>% 
+  filter(Tectonic_setting=="OROGENIC BELT") %>% 
+  select(Q = Quartz,
+              Ab = Albite,
+              An = Anorthite) %>%
+  ggtern(aes(x=Ab, y=Q, z=An)) +
+  geom_point() +
+  ggtern::geom_confidence_tern() 
+```
+
+ou pivotado
+
+```{r,warning=FALSE}
+BD %>% 
+  filter(Tectonic_setting=="ARCHAEAN CRATONS") %>% 
+  select(Q = Quartz,
+              Ab = Albite,
+              An = Anorthite,
+              SubGroup) %>%
+  ggtern(aes(x= Ab, y=Q, z=An, col = SubGroup)) +
+  geom_point() +
+  facet_wrap( ~ SubGroup)
+```
+
+### Barras
+
+Horizontal
+
+```{r,warning=FALSE}
+BD %>% 
+  reframe(n=n(),
+          .by = Tectonic_setting) %>%
+  ggplot(aes(x=n,
+             y=fct_reorder(Tectonic_setting,n),
+             fill=Tectonic_setting))+
+  geom_bar(stat="identity")+
+  labs(y="Ambientes tectônicos") +
+  theme(axis.title.x = element_blank(),
+        legend.position = "none")
+  
+```
+
+Vertical
+
+```{r,warning=FALSE}
+BD %>% 
+  reframe(n=n(),
+          .by = Tectonic_setting) %>%
+  ggplot(aes(x=fct_reorder(Tectonic_setting,desc(n)),
+             y=n,
+             fill=Tectonic_setting))+
+  geom_bar(stat="identity")+
+  scale_x_discrete(guide = guide_axis(n.dodge = 4))+
+  theme(axis.title.x = element_blank(),
+        legend.position = "none")
+  
+```
+
+### Pie-Chart
+
+Simples, calculando a média com reframe() + mean()
+
+```{r}
+BD %>%
+  select(
+    Q = Quartz,
+    Ab = Albite,
+    An = Anorthite,
+    Tectonic = Tectonic_setting
+  ) %>%
+  reframe(
+    Q = mean(Q, na.rm = TRUE),
+    Ab = mean(Ab, na.rm = TRUE),
+    An = mean(An, na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = Q:An,
+               names_to = "mineral",
+               values_to = "value") %>%
+  ggplot(aes(x = "", y = value, fill = mineral)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y")
+```
+
+Ou então, pivotado
+
+```{r}
+BD %>%
+  select(
+    Q = Quartz,
+    Ab = Albite,
+    Or = Orthoclase,
+    Tectonic = Tectonic_setting
+  ) %>%
+  drop_na(Q,Ab,Or) %>% 
+  reframe(
+    Q = mean(Q, na.rm = TRUE),
+    Ab = mean(Ab, na.rm = TRUE),
+    Or = mean(Or, na.rm = TRUE),
+              .by=Tectonic)  %>%
+  group_by(Tectonic) %>% 
+  mutate(total=sum(Q,Ab,Or),
+         across(.cols=Q:Or,~.x*100/total)) %>% 
+  ungroup() %>%       
+  pivot_longer(cols = Q:Or,
+               names_to = "mineral",
+               values_to = "value") %>%
+  ggplot(aes(x = "", y = value, fill = mineral)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y")+
+  facet_wrap(~Tectonic)
+```
+
+### Direcional
+
+Para dados direcionais, vamos criar um banco de dados dummy:
+
+```{r}
+
+# Numero de amostras pra grupos A, B 
+n_wr<-c(450,450)
+
+n <- 100
+
+# Gere ângulos aleatórios entre 0 e 2*pi (360 graus)
+angulos <- runif(n, min = 0, max = 2 * pi)
+
+# Gere raios aleatórios (magnitude) com uma distribuição desejada
+# Neste exemplo, estamos usando uma distribuição normal (gaussiana)
+raios <- rnorm(n, mean = 1, sd = 0.2)
+
+# Converta as coordenadas polares em coordenadas cartesianas
+x <- raios * cos(angulos)
+y <- raios * sin(angulos)
+
+# Crie um gráfico de dispersão dos dados
+plot(x, y, main = "Dados Sintéticos Polares", xlab = "X", ylab = "Y")
+
+#Parametros de simulação 
+ripples<-50
+ripples_SD<-15
+dunas<-150
+dunas_SD<-5
+
+# Criar banco de dados
+
+PALEOCURRENTS<-tibble(direction=c(rnorm(1:n_wr[1],mean=ripples,sd=ripples_SD),
+                                  rnorm(1:n_wr[2],mean=dunas,sd=dunas_SD)),
+                      facies=c(rep("WINDRIPPLES",times=n_wr[1]),
+                               rep("DUNES",times=n_wr[2])))
+
+PALEOCURRENTS
+```
+
+Grafico simples
+
+```{r,warning=FALSE}
+PALEOCURRENTS %>% 
+  mutate(raddirection=direction * pi / 180) %>%  # converter radianos
+  ggplot(aes(x=direction,fill=facies))+
+  geom_histogram(color="white",bins=5,breaks=seq(0, 360,by=10))+
+  coord_polar()+
+  scale_x_continuous("", limits = c(0, 360), 
+                     breaks = seq(0, 360,by=30), labels =  seq(0, 360,by=30))+
+  scale_y_continuous("", limits = c(0, 100), 
+                     breaks = seq(0, 100,by=25), labels =  seq(0, 100,by=25))
+
+
+raios %>% 
+  mutate(raddirection=direction * pi / 180) %>%  # converter radianos
+  ggplot(aes(x=direction,fill=facies))+
+  geom_histogram(color="white",bins=5,breaks=seq(0, 360,by=10))+
+  coord_polar()+
+  scale_x_continuous("", limits = c(0, 360), 
+                     breaks = seq(0, 360,by=30), labels =  seq(0, 360,by=30))+
+  scale_y_continuous("", limits = c(0, 100), 
+                     breaks = seq(0, 100,by=25), labels =  seq(0, 100,by=25))
+```
+
+### Estratigráfico
+
+```{r}
+lvsd %>%
+  filter(well == "TG-227") %>%
+  pivot_longer(
+    cols = c(p_wave:s_wave, porosity, density),
+    names_to = "var",
+    values_to = "value"
+  ) %>%
+  mutate(var = factor(var, levels = c("porosity", "density", "p_wave", "s_wave"))) %>%
+  ggplot(aes(x = value, y = depth)) +
+  geom_rect(
+    mapping = aes(
+      ymin = 283.45,
+      ymax = 298.10,
+      xmin = -Inf,
+      xmax = Inf
+    ),
+    alpha = 0.5,
+    fill = "gray",
+    inherit.aes = FALSE
+  ) +
+  geom_rect(
+    mapping = aes(
+      ymin = 298.10,
+      ymax = 340,
+      xmin = -Inf,
+      xmax = Inf
+    ),
+    alpha = 0.3,
+    fill = "lightyellow",
+    inherit.aes = FALSE
+  ) +
+  geom_hline(
+    yintercept = c(283.45, 298.10, 340),
+    col = "red",
+    lty = 2,
+    alpha = 0.7
+  ) +
+  geom_lineh() +
+  geom_point() +
+  scale_y_reverse() +
+  facet_geochem_gridh(vars(var), scales = "free") +
+  labs(x = NULL,
+       y = "Depth (m)") +
+  theme_paleo()
+
+```
+
+### Mapas
+
+Para usar o R para mapas, algumas bibliotecas são fundamentais, como:
+
+-   **sf**: Cria objetos espaciais com sistemas de referência de coordenadas e diversas funções de geoprocessamento.
+-   **terra** e **raster**: Pacotes indicados para trabalhar com dados do tipo raster, cada um com suas particularidades.
+
+Outras bibliotecas são muito úteis para coisas em especifico
+
+-   **chronosphere**: Focado em dados de períodos geológicos distintos, com API para dados paleogeográficos e paleoclimáticos.
+-   **mapview**: Biblioteca para visualização rapida de dados espaciais de forma interativa
+-   **ggspatial**, **ggdal**, **tidyterra**: Extensões do `ggplot2` para manipulação e visualização de dados espaciais.
+-   **geobr**: Fornece bases cartográficas brasileiras.
+-   **vapour**: Leitura eficiente de arquivos raster, como imagens de satélite e DEMs.
+
+A estrutura para mapas com ggplot é igual as anteriores. Vamos começar criando um banco de dados dummy com coordenadas dentro do brasil
+
+```{r}
+coords_br <- data.frame(
+  id=1:10,
+  latitude = runif(10, min = -33, max = 0), # Valores aleatórios para latitude
+  longitude = runif(10, min = -54, max = -40) # Valores aleatórios para longitude
+)
+```
+
+Vamos visualizar rapidamente com mapview, mas para isso, primeiro precisamos converter o dataframe coords_br para um dado espacial. Para isso, vamos usar a função st_as_sf() da biblioteca sf:
+
+```{r}
+# Coordinate Ref System WGS84 latlong = 4326
+# Funciona melhor no viewer
+library(sf)
+
+coords_br %>% 
+  st_as_sf(coords = c("longitude","latitude"), # informar nome colunas com X,Y
+           crs=4326) ->BDS_SPATIAL
+
+BDS_SPATIAL %>% # informar crs WGS84 / EPSG = european petroleum society...
+  mapview(.)
+```
+
+Vamos tilizar agora o pacote geobr para baixar dados cartograficos do brasil.
+
+```{r}
+
+# baixar shapefile estados brasileiros
+estados<-geobr::read_state()
+POA<-geobr::read_municipality() %>% 
+  filter(name_muni=="POA")
+# filtrar para RS
+rs <- estados %>% 
+  filter(abbrev_state=="RS")
+# criar coordenadas dummies dentro do RS
+coords<-st_sample(rs, 100) 
+```
+
+Criação do mapa com ggplot
+
+```{r}
+library(ggspatial)
+
+inset<-  ggplot()+
+  geom_sf(data = estados,fill="black")+
+  geom_sf(data = rs,fill="red")+
+  theme_void() +  # Remove elementos do gráfico
+  theme(plot.background = element_rect(fill = "transparent", colour = NA))  # Define o fundo como transparente
+
+
+RS<-ggplot()+
+    geom_sf(data = rs,linewidth=1)+
+    geom_sf(data = coords,color="grey50",size=2)+
+    geom_sf(data=POA,fill="red")+
+    coord_sf(xlim=c(-48,-59),
+             ylim=c(-26,-34))+
+    ggspatial::annotation_north_arrow(location="tr")+
+    ggspatial::annotation_scale(location="bl")
+
+#Patchwork
+
+RS + inset_element(inset, left = 0, bottom = 0.7, right = 0.3, top = 1)
+```
+
+```{r}
+library(ggdal)
+
+ggplot()+
+    ggdal::annotation_gdal(dsn = "virtualearth")+
+    geom_sf(data = rs,
+            linewidth=1.5,
+            fill=NA,col="white")+
+    geom_sf(data = coords,color="red",size=2)
+```
+
+## Cores
+
+Cores podem inseridas através de:
+
+-   Seus nomes ("white", "aliceblue", "antiquewhite"). Cheque todas usando a função colors()
+
+    ```{r}
+    colors()
+    ```
+
+-   Por seus códigos
+
+    ```{r,warning=FALSE}
+    par(mfrow=c(1,2))
+
+    # Hexadecimal
+    plot(1:10, col = "#FF5733", main="Hexadecimal")
+
+    # RGB
+    plot(1:10, col = rgb(255, 87, 51, maxColorValue = 255),main="RGB")
+
+    par(mfrow=c(1,1))
+
+    ```
+
+-   Paletas prontas de cores- as mais utilizadas são Viridis e rColorBrewer
+
+As paletas de cores são em geral convergentes, divergentes ou categóricas. Outra subdivisão são valores continuos ou discretos.
+
+### Viridis
+
+#### Scale\_\*\_viridis_b
+
+Usar scale\_\*\_viridis_b para dados continuos separados em grupos (bins). \* representa ou color ou fill.
+
+```{r,warning=FALSE}
+BD %>% 
+  ggplot(aes(x=SiO2,
+             y=TiO2,
+             color=Al2O3))+
+  geom_point()+
+  scale_color_viridis_b(option = "magma",n.breaks=3) +
+  labs(title = "Viridis - Magma (A)")
+```
+
+#### Scale\_\*\_viridis_c
+
+Usar scale\_\*\_viridis_c para dados continuos. \* representa ou color ou fill : color para as linhas (no caso o ponto) e fill para colunas.
+
+```{r,warning=FALSE,fig.height=15,fig.width=8}
+
+BD %>% 
+  ggplot(aes(x=SiO2,
+             y=TiO2,
+             color=Al2O3))+
+  geom_point()+
+  scale_color_viridis_c(option = "magma") +
+  labs(title = "Viridis - Magma (A)")->A
+
+BD %>% 
+  ggplot(aes(x=SiO2,
+             y=TiO2,
+             color=Al2O3))+
+  geom_point()+
+  scale_color_viridis_c(option = "inferno") +
+  labs(title = "Viridis - Inferno (B)")->B
+
+
+BD %>% 
+  ggplot(aes(x=SiO2,
+             y=TiO2,
+             color=Al2O3))+
+  geom_point()+
+  scale_color_viridis_c(option = "plasma") +
+  labs(title = "Viridis - Plasma (C)")->C
+
+BD %>% 
+  ggplot(aes(x=SiO2,
+             y=TiO2,
+             color=Al2O3))+
+  geom_point()+
+  scale_color_viridis_c(option = "viridis") +
+  labs(title = "Viridis - Viridis (D)")->D
+
+BD %>% 
+  ggplot(aes(x=SiO2,
+             y=TiO2,
+             color=Al2O3))+
+  geom_point()+
+  scale_color_viridis_c(option = "cividis") +
+  labs(title = "Viridis - Cividis (E)")->E
+
+BD %>% 
+  ggplot(aes(x=SiO2,
+             y=TiO2,
+             color=Al2O3))+
+  geom_point()+
+  scale_color_viridis_c(option = "rocket") +
+  labs(title = "Viridis - rocket (F)")->F1
+
+
+BD %>% 
+  ggplot(aes(x=SiO2,
+             y=TiO2,
+             color=Al2O3))+
+  geom_point()+
+  scale_color_viridis_c(option = "mako") +
+  labs(title = "Viridis - Mako (G)")->G
+
+BD %>% 
+  ggplot(aes(x=SiO2,
+             y=TiO2,
+             color=Al2O3))+
+  geom_point()+
+  scale_color_viridis_c(option = "turbo") +
+  labs(title = "Viridis - Turbo(H)")->H
+
+
+A+B+C+D+E+F1+G+H+
+plot_layout(ncol = 2)
+```
+
+#### Scale\_\*\_viridis_d
+
+Usar scale\_\*\_viridis_dpara dados discretos. \* representa ou color ou fill : color para as linhas (no caso o ponto) e fill para colunas.
+
+```{r,warning=FALSE}
+BD %>% 
+  ggplot(aes(x=fct_reorder(Tectonic_setting,TiO2),
+             y=TiO2,
+             fill=fct_reorder(Tectonic_setting,TiO2)))+
+  geom_boxplot()+
+  scale_fill_viridis_d(option = "magma") +
+  labs(title = "Viridis - Magma (A)",
+       fill="Ambiente Tectônico")+
+  theme(axis.title.x=element_blank(), # retirar nome escala
+          axis.text.x=element_blank(), # retirar texto escala
+          axis.ticks.x=element_blank()) # retirar ticks escala
+  
+```
+
+### ColorBrew
+
+Paleta de cores "color-blind friendly" facilitando visualização universal de gráficos. O conjunto completo de cores pode ser obtido com a função display.brewer.all().
+
+```{r,warning=FALSE,fig.height=13}
+display.brewer.all()
+```
+
+A biblioteca colorbrewer divide suas pallete (conjunto de cores) em sequencial, divergente e categórico, usando a função scale\_\*\_brewer() e o parâmetro pallete para determinar pallete.
+
+```{r,warning=FALSE,fig.height=15}
+BD %>% 
+   drop_na(CaO,Na2O,MgO) %>% 
+   ggplot(aes(x=CaO,
+              y=Na2O,
+              colour=MgO))+
+  geom_point()+
+  scale_color_distiller(palette = "Greens",direction = 1) +
+  labs(title = "Sequencial Greens") -> A
+
+BD %>% 
+   drop_na(CaO,Na2O,MgO) %>% 
+   ggplot(aes(x=CaO,
+              y=Na2O,
+              colour=MgO))+
+  geom_point()+
+  scale_color_distiller(palette = "YlOrRd",direction = 1) +
+  labs(title = "Sequencial YlOrRd") -> B
+
+
+BD %>% 
+  drop_na(Cu) %>% 
+  ggplot(aes(x=fct_reorder(Tectonic_setting,Cu),
+             y=Cu,
+             fill=fct_reorder(Tectonic_setting,Cu)))+
+  geom_boxplot()+
+  scale_fill_brewer(palette = "Set1",direction = 1) +
+  scale_y_log10()+
+  labs(title = "Categórico Set1",
+       fill="Ambiente\nTectônico")+
+  theme(axis.title.x=element_blank(), # retirar nome escala
+          axis.text.x=element_blank(), # retirar texto escala
+          axis.ticks.x=element_blank())->C # retirar ticks escala
+
+BD %>% 
+  drop_na(Cu) %>% 
+  ggplot(aes(x=fct_reorder(Tectonic_setting,Cu),
+             y=Cu,
+             fill=fct_reorder(Tectonic_setting,Cu)))+
+  geom_violin()+
+  scale_fill_brewer(palette = "Pastel1",direction = 1) +
+  scale_y_log10()+
+  labs(title = "Categórico Pastel1",
+       fill="Ambiente\nTectônico")+
+  theme(axis.title.x=element_blank(), # retirar nome escala
+        axis.text.x=element_blank(), # retirar texto escala
+        axis.ticks.x=element_blank())->D # retirar ticks escala
+
+BD %>% 
+  drop_na(Cu) %>% 
+  ggplot(aes(x=SiO2,y=Al2O3,colour=log10(Cu)))+
+  geom_point()+
+  scale_colour_distiller(palette = "Spectral") +
+  labs(title = "Divergente Spectral",
+       fill="log10\nCobre")->E
+
+BD %>% 
+  drop_na(FeOt) %>% 
+  filter(FeOt>0) %>% 
+  ggplot(aes(x=SiO2,y=Al2O3,colour=FeOt))+
+  geom_point()+
+  scale_colour_distiller(palette = "RdBu") +
+  labs(title = "Divergente RdBu",
+       fill="Ferro\ntotal")->F1
+
+A+B+C+D+E+F1+plot_layout(ncol=2)
+
+# & theme( legend.title = element_text(size =10),
+#                                          legend.text = element_text(size = 8),
+#                                          legend.key.size = unit(4, "cm"),
+#                                          legend.key.height = unit(1, "cm"),  
+#                                          legend.key.width = unit(1, "cm"),
+#                                          axis.text.y=element_text(size=3),
+#                                          plot.title=element_text(size=10)
+#                                          )
+
+```
+
+### Cores manuais
+
+No banco de dados
+
+```{r,warning=FALSE}
+
+BD %>% 
+  select(Tectonic_setting,TiO2,Na2O) %>% 
+ # 
+  mutate(colors=case_when(
+    Tectonic_setting=="CONVERGENT MARGIN"~"red",
+    Tectonic_setting=="ARCHAEAN CRATONS"~"blue",
+    Tectonic_setting=="OROGENIC BELT"~"yellow",
+    TRUE~"black"
+  )) %>% 
+  ggplot(aes(x=TiO2,y=Na2O,color=colors))+
+  geom_point()+
+  scale_color_identity() 
+
+```
+
+Vetor
+
+```{r,warning=FALSE}
+cols<-c("red","blue","yellow")
+
+BD %>% 
+  filter(Tectonic_setting %in% c("CONVERGENT MARGIN", "ARCHAEAN CRATONS", "OROGENIC BELT") ) %>% 
+ggplot(aes(x=TiO2,y=Na2O,color=Tectonic_setting))+
+  geom_point()+
+  scale_color_manual(values=cols) 
+
+```
+
+Manuais
+
+```{r,warning=FALSE}
+
+BD %>% 
+  filter(Tectonic_setting %in% c("CONVERGENT MARGIN", "ARCHAEAN CRATONS", "OROGENIC BELT","RIFT VOLCANICS") ) %>% 
+ggplot(aes(x=TiO2,y=Na2O,color=Tectonic_setting))+
+  geom_point()+
+  scale_color_manual(values=c("red","blue","yellow","black")) 
+```
