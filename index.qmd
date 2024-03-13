@@ -1,4 +1,41 @@
 ---
-title: "gabrielbertolini"
+title: "Gabriel Bertolini"
+about:
+  template: broadside
+  image: profile.jpg
+  links:
+    - icon: twitter
+      text: twitter
+      href: https://twitter.com/Gabertol_
+    - icon: github
+      text: Github
+      href: https://github.com/gabertol/
+    - icon: linkedin
+      text: Linkedin
+      href: https://www.linkedin.com/in/gabriel-bertolini-787172b2/
+    - icon: researchgate
+      text: Research Gate
+      href: https://www.researchgate.net/profile/Gabriel-Bertolini
 ---
 
+Gabriel Bertolini é pesquisador na Universidade do Vale do Rio dos Sinos, junto ao ITT Oceaneon. Atua na área de sedimentologia, com enfâse em petrologia sedimentar, geocronologia, petrofisica e análise de dados.
+
+## Educação
+
+University of Aberdeen | Aberdeen | Escócia | UK
+Universidade Federal do Rio Grande do Sul | Porto Alegre | Rio Grande do Sul | Brasil
+PhD com dupla titulação em Geocências | Out 2015 - Mar 2020
+
+Universidade do Vale do Rio dos Sinos, São Leopoldo | Rio Grande do Sul, Brasil
+Graduação em Geologia | Mar 2010 - Jan 2015
+
+## Experiência
+
+Pesquisador de pós-doutorado (2021)| Universidade Federal do Rio Grande do Sul 
+Bolsista CAPES PrInt
+
+Pesquisador de pós-doutorado (2022)| Universidade Federal do Rio Grande do Sul
+Bolsista Petrobrás
+
+Pesquisador de pós-doutorado (2023)| Universidade Federal do Rio Grande do Sul 
+Bolsista ANP (Agência Nacional do Petróleo)
