@@ -2,7 +2,7 @@
   {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About",
+    "title": "Sobre",
     "section": "",
     "text": "Doutor em Geociências pela University of Aberdeen e Universidade Federal do Rio Grande do Sul em regime de dupla titulação com período no exterior (Co-tutela) (2015-2020), como bolsista SWE CNPq. Realizou pós-doutorado na UFRGS (2021) como bolsista Capes Print, pós-doutorado na UFRGS (2022) como bolsista Petrobrás e pós-doutorado na UFRGS (2023) como bolsista PRH-14 da ANP. Possui graduação em Geologia pela Universidade do Vale do Rio dos Sinos (UNISINOS) (2010-2014) com período sanduíche na Universidad de Alicante (Espanha) como bolsista CNPq (2012-2013). Possui experiência em técnicas multiproxy (geocronologia U-Pb em zircão detrítico, minerais pesados, sedimentologia aplicada) e em tratamento estatístico aplicado a proveniência sedimentar através de programação. Além disso, tem interesse na caracterização de reservatórios vulcanossedimentares, através de petrofísica, estudos diagenéticos e modelamento geológico. Atualmente, é pesquisador junto ao ITT OCEANEON da Unisinos como bolsista CNPq DTI-B no projeto “Rochas geradoras de hidrocarbonetos na Bacia Sergipe-Alagoas: caracterização multi-proxy, correlação com eventos anóxicos oceânicos (OAEs) e suas implicações na caracterização de sistemas petrolíferos”."
   },
@@ -18,7 +18,7 @@
     "href": "index.html#educação",
     "title": "Gabriel Bertolini",
     "section": "Educação",
-    "text": "Educação\nUniversity of Aberdeen | Aberdeen | Escócia | UK Universidade Federal do Rio Grande do Sul | Porto Alegre | Rio Grande do Sul | Brasil PhD com dupla titulação em Geocências | Out 2015 - Mar 2020\nUniversidade do Vale do Rio dos Sinos, São Leopoldo | Rio Grande do Sul, Brasil Graduação em Geologia | Mar 2010 - Jan 2015"
+    "text": "Educação\nUniversity of Aberdeen | Escócia | UK Universidade Federal do Rio Grande do Sul | Rio Grande do Sul | Brasil PhD com dupla titulação em Geocências | Out 2015 - Mar 2020\nUniversidade do Vale do Rio dos Sinos, São Leopoldo | Rio Grande do Sul, Brasil Graduação em Geologia | Mar 2010 - Jan 2015"
   },
   {
     "objectID": "index.html#experiência",
@@ -26,5 +26,19 @@
     "title": "Gabriel Bertolini",
     "section": "Experiência",
     "text": "Experiência\nPesquisador de pós-doutorado (2021)| Universidade Federal do Rio Grande do Sul Bolsista CAPES PrInt\nPesquisador de pós-doutorado (2022)| Universidade Federal do Rio Grande do Sul Bolsista Petrobrás\nPesquisador de pós-doutorado (2023)| Universidade Federal do Rio Grande do Sul Bolsista ANP (Agência Nacional do Petróleo)"
+  },
+  {
+    "objectID": "publications.html",
+    "href": "publications.html",
+    "title": "Publicações",
+    "section": "",
+    "text": "Publicações\nLink para download de artigos\nBERTOLINI, G.; HARTLEY, A.J. ; MARQUES, J.C. ; PAIM, J.C. . Controls on grain-size distribution in an ancient sand sea. SEDIMENTOLOGY, v. 71, p. 1, 2023.\nSCHERER, CLAITON M.S. ; REIS, ADRIANO D. ; HORN, BRUNO L.D. ; BERTOLINI, GABRIEL ; LAVINA, ERNESTO L.C. ; KIFUMBI, CARREL ; GOSO AGUILAR, CESAR . The stratigraphic puzzle of the permo-mesozoic southwestern Gondwana: The Paraná Basin record in geotectonic and palaeoclimatic context. EARTH-SCIENCE REVIEWS, v. 240, p. 104397, 2023.\nSCHERER, CLAITON M.S. ; REIS, ADRIANO D. ; HORN, BRUNO L.D. ; BERTOLINI, GABRIEL ; LAVINA, ERNESTO L.C. ; KIFUMBI, CARREL ; GOSO, CESAR . Corrigendum to -The stratigraphic puzzle of the permo-mesozoic southwestern Gondwana: The Paraná Basin record in geotectonic and palaeoclimatic context- [Earth-Science Reviews 240 (2023) 104397]. EARTH-SCIENCE REVIEWS, v. 243, p. 104505, 2023.\nPADILHA, N. L. ; BERTOLINI, G. ; MARQUES, J. C. ; GOES, A. M. ; NOGUEIRA, A. C. R. ; MEDEIROS, R. S. P. ; ANDRADE, L. S. ; SODRE, A. A. N. ; CANARIM, D. M. ; SOUZA, P. A. ; SCOMAZZON, A. K. ; OLIVEIRA, E. J. ; SANTOS, J. M. M. . Zircão, o Guardião do Tempo: Datação U-Pb aplicada a provêniencia sedimentar- revisão metodológica e utilidade no projeto Biocronorte. Revista da Academia de Ciências do Piauí, v. 3, p. 157, 2022.\nARAUJO, V. ; MARQUES, J. C. ; BERTOLINI, G. ; FRANTZ, J. C. . U-Pb zircon xenocrysts dating as a proxy to assess volcanic assimilation and the underlying crust, Cretaceous Jaguarão Formation, RS-Brazil. Brazilian Journal of Geology, v. 52, p. 1-16, 2022.\nJoão Rodrigo Pilla Dias ; MARQUES, J. C. ; BERTOLINI, G. ; FRANTZ, JOSÉ C. ; FRIEDRICH, B. M. ; Carlos José Sobrinho da Silveira ; QUEIROZ, W. ; PAIM, J. C. S. . Regional high-grade metamorphic peak imprint in zircons from the mafic-ultramafic Jacurici Complex, São Francisco Craton, Brazil. BRAZILIAN JOURNAL OF GEOLOGY, v. 52, p. 1-14, 2022.\nBERTOLINI, GABRIEL; MARQUES, JULIANA ; HARTLEY, ADRIAN J. ; BASEI, M. A. S. ; FRANTZ, JOSÉ C. ; SANTOS, P. R. . DETERMINING SEDIMENT PROVENANCE HISTORY IN A GONDWANAN ERG: BOTUCATU FORMATION, NORTHERN PARANÁ BASIN, BRAZIL. SEDIMENTARY GEOLOGY, p. 105883, 2021.\nJoão Rodrigo Pilla Dias ; BERTOLINI, G. ; MARQUES, J. C. ; FRANTZ, J. C. ; Carlos José Sobrinho da Silveira ; CEZARIO, N. . Análise prospectiva de corpos máficos-ultramáficos através de aerogeofísica: Caso de estudo no Vale do Jacurici/Bahia. REVISTA DE GEOCIÊNCIAS DO NORDESTE, v. 7, p. 271-281, 2021.\nYU, X. ; WANG, C. ; BERTOLINI, G. ; LIU, C. ; WANG, J. . Damp- to dry aeolian systems: Sedimentology, climate forcing, and aeolian accumulation in the Late Cretaceous Liyou Basin, South China. SEDIMENTARY GEOLOGY, v. 426, p. 106030, 2021.\nBERTOLINI, GABRIEL; MARQUES, JULIANA ; HARTLEY, ADRIAN J. ; DAROSA, ATILA A.S. ; S.SCHERER, CLAITON M. ; BASEI, MIGUEL A.S. ; FRANTZ, JOSÉ C. . Controls on Early Cretaceous desert sediment provenance in south-west Gondwana, Botucatu Formation (Brazil and Uruguay). SEDIMENTOLOGY, p. sed.12715, 2020.\nBERTOLINI, G.; HARTLEY, A. J. ; MARQUES, J. C. ; HEALY, D. ; FRANTZ, J. C. . The effects of basaltic lava flows on the petrophysical properties and diagenesis of interbedded aeolian sandstones: an example from the Cretaceous Paraná Basin, Brazil. PETROLEUM GEOSCIENCE, p. petgeo2020-036, 2020."
+  },
+  {
+    "objectID": "lista.html",
+    "href": "lista.html",
+    "title": "Conteúdo didático",
+    "section": "",
+    "text": "Materiais de aula\n\n\n\n\n\n\n\n\n\n\nNo matching items"
   }
 ]
