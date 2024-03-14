@@ -13,7 +13,7 @@ about:
     - icon: linkedin
       text: Linkedin
       href: https://www.linkedin.com/in/gabriel-bertolini-787172b2/
-    - icon: door-closed
+    - icon: door closed
       text: Research Gate
       href: https://www.researchgate.net/profile/Gabriel-Bertolini
 editor: 
@@ -27,12 +27,15 @@ em petrologia sedimentar, geocronologia, petrofisica e análise de dados.
 
 ## Educação
 
-University of Aberdeen \| Escócia \| UK Universidade Federal do Rio
-Grande do Sul \| Rio Grande do Sul \| Brasil PhD com dupla titulação em
-Geocências \| Out 2015 - Mar 2020
+University of Aberdeen \| Escócia \| UK
 
-Universidade do Vale do Rio dos Sinos, São Leopoldo \| Rio Grande do
-Sul, Brasil Graduação em Geologia \| Mar 2010 - Jan 2015
+Universidade Federal do Rio Grande do Sul \| Brasil \|
+
+PhD com dupla titulação em Geocências \| Out 2015 - Mar 2020
+
+Universidade do Vale do Rio dos Sinos, São Leopoldo \| Brasil \|
+
+Graduação em Geologia \| Mar 2010 - Jan 2015
 
 ## Experiência
 

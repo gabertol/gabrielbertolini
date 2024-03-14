@@ -12,20 +12,17 @@ website:
       - publications.qmd
       - text: "Conteúdo didático"
         menu:
-          - text: "Curso R"
-            menu:
-              - text: "Aula 1- R Base"
-                href: aula_1.qmd
-              - text: "Aula 2- Bancos de dados"
-                href: aula_2.qmd
-              - text: "Aula 3- Gráficos"
-                href: aula_3.qmd
+          - text: "Aula 1- R Base"
+            href:  aula_1.qmd
+          - text: "Aula 2- Bancos de dados"
+            href:  aula_2.qmd
+          - text: "Aula 3- Gráficos"
+            href:  aula_3.qmd
+          
 
 format:
   html:
     theme: cosmo
     css: styles.css
     toc: true
-
-
 

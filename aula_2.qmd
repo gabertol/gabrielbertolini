@@ -1,5 +1,6 @@
 ---
 title: "Aula 2 - Introdução ao tidyverse"
+warning: FALSE
 ---
 
 # Aula 2
@@ -21,6 +22,7 @@ Os pacotes só precisam ser instalados uma vez, e carregados sempre que necessá
 ```{r, warning=FALSE}
 #install.packages("tidyverse") # Instalar se necessário
 library(tidyverse)
+library(gt)
 
 ```
 
@@ -61,7 +63,8 @@ A biblioteca guarda-chuva tidyverse inclui uma serie de pacotes, cada uma para s
 
 ```{r}
 BD<-read.csv("./data/geoquimica_granito.csv")
-BD
+BD %>% 
+  gt()
 # Roda o objeto no console
 #BD 
 

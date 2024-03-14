@@ -1,5 +1,6 @@
 ---
 title: "3-Gráficos com ggplot2"
+warning: FALSE
 ---
 
 # Aula 3
@@ -44,7 +45,9 @@ Banco obtido em @bonin2020 .
 
 ```{r,warning=FALSE}
 BD<-read.csv("./data/geoquimica_granito.csv") %>%
-    as_tibble()
+    as_tibble() 
+
+BD %>% gt()
 
 ```
 
@@ -53,6 +56,9 @@ Banco obtido em @bertolini2020
 ```{r,warning=FALSE}
 lvsd<-read.csv("./data/lvsd.csv") %>%
     as_tibble()
+
+lvsd %>% 
+  gt()
 ```
 
 ## Gráficos ggplot2
@@ -395,26 +401,15 @@ PALEOCURRENTS
 Grafico simples
 
 ```{r,warning=FALSE}
+
 PALEOCURRENTS %>% 
-  mutate(raddirection=direction * pi / 180) %>%  # converter radianos
   ggplot(aes(x=direction,fill=facies))+
-  geom_histogram(color="white",bins=5,breaks=seq(0, 360,by=10))+
+  geom_histogram(color="white",bins=30,breaks=seq(0, 360,by=10))+
   coord_polar()+
   scale_x_continuous("", limits = c(0, 360), 
-                     breaks = seq(0, 360,by=30), labels =  seq(0, 360,by=30))+
-  scale_y_continuous("", limits = c(0, 100), 
-                     breaks = seq(0, 100,by=25), labels =  seq(0, 100,by=25))
+                     breaks = seq(0, 360,by=30), 
+                     labels =  seq(0, 360,by=30))
 
-
-raios %>% 
-  mutate(raddirection=direction * pi / 180) %>%  # converter radianos
-  ggplot(aes(x=direction,fill=facies))+
-  geom_histogram(color="white",bins=5,breaks=seq(0, 360,by=10))+
-  coord_polar()+
-  scale_x_continuous("", limits = c(0, 360), 
-                     breaks = seq(0, 360,by=30), labels =  seq(0, 360,by=30))+
-  scale_y_continuous("", limits = c(0, 100), 
-                     breaks = seq(0, 100,by=25), labels =  seq(0, 100,by=25))
 ```
 
 ### Estratigráfico
@@ -427,7 +422,7 @@ lvsd %>%
     names_to = "var",
     values_to = "value"
   ) %>%
-  mutate(var = factor(var, levels = c("porosity", "density", "p_wave", "s_wave"))) %>%
+  dplyr::mutate(var = factor(var, levels = c("porosity", "density", "p_wave", "s_wave"))) %>%
   ggplot(aes(x = value, y = depth)) +
   geom_rect(
     mapping = aes(
