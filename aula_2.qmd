@@ -19,7 +19,7 @@ Função install.packages pode ser usada para baixar arquivos do CRAN - pacotes 
 
 Os pacotes só precisam ser instalados uma vez, e carregados sempre que necessário usando a função library().
 
-```{r, warning=FALSE}
+```{r, output=FALSE}
 #install.packages("tidyverse") # Instalar se necessário
 library(tidyverse)
 library(gt)
@@ -34,11 +34,11 @@ vetor<-c(1.1,4.2,2.9,9,1,4,5,0.0001,NA)
 # média
 mean(vetor,na.rm=TRUE) #média
 # desvio padrão
-sd(vetor)
+sd(vetor,na.rm=TRUE)
 # minimo
-min(vetor) 
+min(vetor,na.rm=TRUE) 
 # maximo
-max(vetor) 
+max(vetor,na.rm=TRUE) 
 # extensão
 length(vetor) 
 # cria sequencia de valores
@@ -62,22 +62,23 @@ rep(c("A","B","C"), 2)
 A biblioteca guarda-chuva tidyverse inclui uma serie de pacotes, cada uma para seu fim. Por hora, vamos explorar o pacote dplyr que trata de manipulação básica de bancos de dados. Para isso, vamos primeiramente importar um banco de dados. Para importar, vamos usar a função read.csv
 
 ```{r}
-BD<-read.csv("./data/geoquimica_granito.csv")
-BD %>% 
-  gt()
-# Roda o objeto no console
-#BD 
-
-
-#Abre tabela estilo excel/ selecionar o objeto com mouse e apertar F2 é a mesma coisa
-#view(BD) 
-
-
-BD<-BD %>% 
+# Importar e criar dataframe (tibble)
+BD<-read.csv("./data/geoquimica_granito.csv") %>% 
   as_tibble()# tibble é um tipo particular de dataframe do tidyverse, que facilita a leitura no prompt
 
+```
 
+Para observar os valores do dataframe no console, pode ser executar o nome do objeto, no caso BD. Abaixo, usamos a função gt() do pacote gt para tabela interativa.
 
+```{r}
+BD %>% 
+  gt_preview()
+```
+
+Abre tabela estilo excel/ selecionar o objeto com mouse e apertar F2 é a mesma coisa
+
+```{r}
+view(BD) 
 ```
 
 Trata-se de um banco de dados de @bonin2020. Aqui vamos usar uma série de funções do dplyr e tidyr para operações nesse banco de dados.
@@ -223,6 +224,16 @@ volc <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidyt
 
 ## select()
 
+Criar bancos de dados selecionando as colunas de interesse. Várias opções mais simples para obter o banco desejado. Algumas funções auxiliares podem ajudar a simplificar esse passo:
+
+-stars_with(): colunas que começam com um prefixo
+
+\- ends_with(): colunas que terminam com um sufixo
+
+\- contains(): colunas que contêm uma string em específico
+
+\- last_col(): última coluna
+
 ```{r}
 
 volc %>% select(volcano_name,-country,latitude:elevation)
@@ -233,39 +244,48 @@ volc %>% select(starts_with("population"))
 
 volc %>% select(contains("within"))
 
-#- **stars_with()**: colunas que começam com um prefixo
-
-#- **ends_with()**: colunas que terminam com um sufixo
-
-#- **contains()**: colunas que contêm uma string
-
-#- **last_col()**: última coluna
 ```
 
 ## filter()
 
+Filtrar bancos de dados por caracteristicas dos valores das colunas (operação nas linhas).
+
+Pode filtrar de acordo com alguma variável categórica
+
 ```{r}
 volc %>% select(volcano_name,country,latitude:elevation) %>% 
          filter(country== "Antarctica")
+```
 
+Quando quiser retirar mais de 1 variável categórica, usar o %in% . No caso, permaneceram os vulcões do Chile, Argentina e Japão
+
+```{r}
+# %in% comando logico para declarar vetores para filter
+
+volc %>% select(volcano_name,country,latitude:elevation) %>% 
+         filter(country %in%  c("Chile","Argentina","Japan"))
+```
+
+Ou pode combinar filtros. Lembrado que o ! significa para retirar, caso os vulcões do Chile foram retirados.
+
+```{r}
 volc %>% select(volcano_name,country,latitude:elevation) %>% 
          filter(!country== "Chile") %>% 
          filter(elevation>1000,
                 latitude>0,
                 longitude>0)
+```
 
-# %in% comando logico para declarar vetores para filter
+Outros operadores logicos como \| (ou) e \$ (e).
 
-volc %>% select(volcano_name,country,latitude:elevation) %>% 
-         filter(!country %in%  c("Chile","Argentina","Japan"))
+```{r}
 
 # | ou
-
-# & e
-
 volc %>% 
   select(volcano_name, country, latitude:elevation) %>% 
   filter(country == "Antarctica" | latitude < 10)
+
+# & e
 
 volc %>% 
   select(volcano_name, country, latitude:elevation) %>% 
@@ -273,6 +293,8 @@ volc %>%
 ```
 
 ## mutate()
+
+Criar colunas usando outras colunas como referência
 
 ```{r}
 volc %>% 
@@ -283,6 +305,11 @@ volc %>%
          ultima_erupcao_milhar=ultima_erupcao/1000,
          ultima_erupcao_milhao=ultima_erupcao/1000000)  
 
+```
+
+Classificar os valores de uma coluna é muitas vezes interessante, a função case_when() é indicada para essa operação.
+
+```{r}
 volc %>% 
   mutate(rocha=case_when(
         major_rock_1 %in% c("Andesite / Basaltic Andesite","Basalt / Picro-Basalt" ,"Trachyte / Trachydacite","Trachyandesite / Basaltic Trachyandesite")~"vulcanica basica",
@@ -292,10 +319,11 @@ volc %>%
 
 
 unique(volc$major_rock_1)
-
 ```
 
-## Count e arrange()
+## count e arrange()
+
+Em um dataframe exau
 
 ```{r}
 volc %>% 
@@ -307,7 +335,11 @@ volc %>%
   arrange(n)
 ```
 
-## Group_by ()
+## group_by()
+
+Ao fazer algum tipo operação, seja count() ou mutate(), agrupar segmentos de dados de acordo com alguma variável categórica produz resultados especificos para cada classe.
+
+Por exemplo, contar quantas erupções aconteceram ano passado em cada pais. Para isso, usar as colunas last_eruption_year e country como parametros no group_by()
 
 ```{r}
 volc %>% 
@@ -318,19 +350,12 @@ volc %>%
 
 ```
 
-Summarise ou reframe()
+## reframe()
+
+A função reframe() remodela os dados brutos em uma versão simplificada. Por exemplo, gerar tabela com a estatisticas descrei
 
 ```{r}
-# Função SE
-SE<-function(vetor,IC){
-  SD<-sd(vetor)
-  N<-length(vetor)
-  SE<-(SD*IC)/sqrt(N)
- 
-   return(
-    SE
-  )
-}
+
 
 # Summarise
 volc %>% 
@@ -359,7 +384,7 @@ volc %>%
 
 \- 1) Em qual país existem mais vulcões?
 
-```{r}
+```{r,code-fold:true,code-summary: "Show the code"}
 volc %>% 
   count(country,sort=TRUE)
 

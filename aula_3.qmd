@@ -23,14 +23,17 @@ Aula introdutória sobre gráficos com ggplot.
 
 ## Importar biblioteca
 
-```{r,echo=FALSE}
-library(dplyr)  # biblioteca do tidyverse de manipulação de banco de dados
-library(tidyr)  # biblioteca do tidyverse para transformar banco de dados
-library(ggtern) # biblioteca que adiciona o gráfico ternário ao ggplot (evitar importar ggplot2 ao importar ggtern)
+```{r,output=FALSE}
+
+library(tidyverse)  # biblioteca do tidyverse para transformar banco de dados
+#library(ggtern) # biblioteca que adiciona o gráfico ternário ao ggplot (evitar importar ggplot2 ao importar ggtern)
+library(deeptime)
 library(forcats) # biblioteca do tidyverse para lidar com fatores
 library(patchwork) # biblioteca para organizar gráficos em um layout
 library(tidypaleo) # biblioteca para plots estratigráficos
 library(RColorBrewer) # biblioteca de paleta de cores
+library(gt)
+library(plotly)
 # Bibliotecas espaciais
 library(sf) # biblioteca para criação de objetos espaciais
 library(mapview) # biblioteca para visualização interativa de dados espaciais
@@ -47,7 +50,8 @@ Banco obtido em @bonin2020 .
 BD<-read.csv("./data/geoquimica_granito.csv") %>%
     as_tibble() 
 
-BD %>% gt()
+BD %>% 
+  gt_preview()
 
 ```
 
@@ -58,8 +62,17 @@ lvsd<-read.csv("./data/lvsd.csv") %>%
     as_tibble()
 
 lvsd %>% 
-  gt()
+   gt_preview()
 ```
+
+Banco dummy de paleocorrents
+```{r}
+PALEOCURRENTS<-read.csv("paleocurrents_dummy.csv")
+
+PALEOCURRENTS %>% 
+  gt_preview()
+```
+
 
 ## Gráficos ggplot2
 
@@ -78,8 +91,12 @@ PLOT1<-BD %>%
   #parametro adicionado para usar
   #escala log10 no eixo x
 
-plotly::ggplotly(PLOT1)
+PLOT1
+```
 
+Gráfico interativo com o plotly
+```{r}
+plotly::ggplotly(PLOT1)
 ```
 
 Aqui, vamos fazer um gráfico de dispersão utilizando diferentes transparencias, adicionadas com função mutate e criação da coluna transp. Notar uso do aes() para mapear o banco de dados.
@@ -132,9 +149,13 @@ BD %>%
 
 Qual a distribuição das séries de granitos utilizando o diagrama P-Q (Debon & Fort, 1983, 1988)
 
+$$
 P = K - (Na + Ca)
+$$
 
-Q = Si/3 - (K + Na + 2\*(Ca/3))
+$$
+Q = \frac{Si}{3} - (K + Na + 2 \times \frac{Ca}{3})
+$$
 
 P vs Q
 
@@ -250,7 +271,7 @@ BD %>%
   select(Q = Quartz,
               Ab = Albite,
               An = Anorthite) %>%
-  ggtern(aes(x=Ab, y=Q, z=An)) +
+  ggtern::ggtern(aes(x=Ab, y=Q, z=An)) +
   geom_point() +
   ggtern::geom_confidence_tern() 
 ```
@@ -359,46 +380,7 @@ BD %>%
 
 ### Direcional
 
-Para dados direcionais, vamos criar um banco de dados dummy:
-
-```{r}
-
-# Numero de amostras pra grupos A, B 
-n_wr<-c(450,450)
-
-n <- 100
-
-# Gere ângulos aleatórios entre 0 e 2*pi (360 graus)
-angulos <- runif(n, min = 0, max = 2 * pi)
-
-# Gere raios aleatórios (magnitude) com uma distribuição desejada
-# Neste exemplo, estamos usando uma distribuição normal (gaussiana)
-raios <- rnorm(n, mean = 1, sd = 0.2)
-
-# Converta as coordenadas polares em coordenadas cartesianas
-x <- raios * cos(angulos)
-y <- raios * sin(angulos)
-
-# Crie um gráfico de dispersão dos dados
-plot(x, y, main = "Dados Sintéticos Polares", xlab = "X", ylab = "Y")
-
-#Parametros de simulação 
-ripples<-50
-ripples_SD<-15
-dunas<-150
-dunas_SD<-5
-
-# Criar banco de dados
-
-PALEOCURRENTS<-tibble(direction=c(rnorm(1:n_wr[1],mean=ripples,sd=ripples_SD),
-                                  rnorm(1:n_wr[2],mean=dunas,sd=dunas_SD)),
-                      facies=c(rep("WINDRIPPLES",times=n_wr[1]),
-                               rep("DUNES",times=n_wr[2])))
-
-PALEOCURRENTS
-```
-
-Grafico simples
+Roseta simples
 
 ```{r,warning=FALSE}
 
@@ -412,52 +394,72 @@ PALEOCURRENTS %>%
 
 ```
 
+Ou facetado
+```{r}
+PALEOCURRENTS %>% 
+  ggplot(aes(x=direction,fill=facies))+
+  geom_histogram(color="white",bins=30,breaks=seq(0, 360,by=10))+
+  coord_polar()+
+  scale_x_continuous("", limits = c(0, 360), 
+                     breaks = seq(0, 360,by=30), 
+                     labels =  seq(0, 360,by=30)) +
+  facet_wrap(~facies)
+```
+
 ### Estratigráfico
 
 ```{r}
 lvsd %>%
   filter(well == "TG-227") %>%
-  pivot_longer(
-    cols = c(p_wave:s_wave, porosity, density),
-    names_to = "var",
-    values_to = "value"
-  ) %>%
-  dplyr::mutate(var = factor(var, levels = c("porosity", "density", "p_wave", "s_wave"))) %>%
-  ggplot(aes(x = value, y = depth)) +
-  geom_rect(
-    mapping = aes(
-      ymin = 283.45,
-      ymax = 298.10,
-      xmin = -Inf,
-      xmax = Inf
-    ),
-    alpha = 0.5,
-    fill = "gray",
-    inherit.aes = FALSE
-  ) +
-  geom_rect(
-    mapping = aes(
-      ymin = 298.10,
-      ymax = 340,
-      xmin = -Inf,
-      xmax = Inf
-    ),
-    alpha = 0.3,
-    fill = "lightyellow",
-    inherit.aes = FALSE
-  ) +
-  geom_hline(
-    yintercept = c(283.45, 298.10, 340),
-    col = "red",
-    lty = 2,
-    alpha = 0.7
-  ) +
+  mutate(age = idade_min + (max(depth) - depth) / (max(depth) - min(depth)) * (140 - 130)) %>% 
+ pivot_longer(
+   cols = c(p_wave:s_wave, porosity, density),
+   names_to = "var",
+   values_to = "value"
+ ) %>%
+ dplyr::mutate(var = factor(var, levels = c("porosity", "density", "p_wave", "s_wave"))) %>%
+  ggplot(aes(x = value, y = age)) +
+  # geom_rect(
+  #   mapping = aes(
+  #     ymin = 283.45,
+  #     ymax = 298.10,
+  #     xmin = -Inf,
+  #     xmax = Inf
+  #   ),
+  #   alpha = 0.5,
+  #   fill = "gray",
+  #   inherit.aes = FALSE
+  # ) +
+  # geom_rect(
+  #   mapping = aes(
+  #     ymin = 298.10,
+  #     ymax = 340,
+  #     xmin = -Inf,
+  #     xmax = Inf
+  #   ),
+  #   alpha = 0.3,
+  #   fill = "lightyellow",
+  #   inherit.aes = FALSE
+  # ) +
+  # geom_hline(
+  #   yintercept = c(283.45, 298.10, 340),
+  #   col = "red",
+  #   lty = 2,
+  #   alpha = 0.7
+  # ) +
   geom_lineh() +
   geom_point() +
+  coord_geo(
+  dat = list("periods","epochs","stages"),
+  ylim =c (150,120),
+  pos = list("l","l","l"),
+  abbrv = FALSE,
+   size = list(7, 5, 2.5),
+  rot = list(90,90,90))+
   scale_y_reverse() +
   facet_geochem_gridh(vars(var), scales = "free") +
-  labs(x = NULL,
-       y = "Depth (m)") +
+  # labs(x = NULL,
+  #      y = "Depth (m)") +
   theme_paleo()
 
 ```
@@ -485,6 +487,9 @@ coords_br <- data.frame(
   latitude = runif(10, min = -33, max = 0), # Valores aleatórios para latitude
   longitude = runif(10, min = -54, max = -40) # Valores aleatórios para longitude
 )
+
+coords_br %>% 
+  gt_preview()
 ```
 
 Vamos visualizar rapidamente com mapview, mas para isso, primeiro precisamos converter o dataframe coords_br para um dado espacial. Para isso, vamos usar a função st_as_sf() da biblioteca sf:
@@ -504,7 +509,7 @@ BDS_SPATIAL %>% # informar crs WGS84 / EPSG = european petroleum society...
 
 Vamos tilizar agora o pacote geobr para baixar dados cartograficos do brasil.
 
-```{r}
+```{r,output=FALSE}
 
 # baixar shapefile estados brasileiros
 estados<-geobr::read_state()
@@ -517,17 +522,20 @@ rs <- estados %>%
 coords<-st_sample(rs, 100) 
 ```
 
-Criação do mapa com ggplot
-
+Criação do mapa com ggplot:
+- Primeiro vamos fazer um mapa regional
 ```{r}
-library(ggspatial)
-
 inset<-  ggplot()+
   geom_sf(data = estados,fill="black")+
   geom_sf(data = rs,fill="red")+
   theme_void() +  # Remove elementos do gráfico
   theme(plot.background = element_rect(fill = "transparent", colour = NA))  # Define o fundo como transparente
 
+inset
+```
+
+- Segundo seguimos com o mapa de interesse, no caso o estado do RS
+```{r}
 
 RS<-ggplot()+
     geom_sf(data = rs,linewidth=1)+
@@ -538,11 +546,17 @@ RS<-ggplot()+
     ggspatial::annotation_north_arrow(location="tr")+
     ggspatial::annotation_scale(location="bl")
 
+RS
+```
+- 3 unir os plots com a biblioteca patchwork
+```{r}
 #Patchwork
 
 RS + inset_element(inset, left = 0, bottom = 0.7, right = 0.3, top = 1)
 ```
 
+Outra opção, é utilziar o pacote ggdal para utilizar layers de imagem de satélites.
+ 
 ```{r}
 library(ggdal)
 
@@ -554,7 +568,7 @@ ggplot()+
     geom_sf(data = coords,color="red",size=2)
 ```
 
-## Cores
+# Cores
 
 Cores podem inseridas através de:
 
@@ -770,16 +784,8 @@ BD %>%
   labs(title = "Divergente RdBu",
        fill="Ferro\ntotal")->F1
 
-A+B+C+D+E+F1+plot_layout(ncol=2)
+A+B+C+D+E+F1+plot_layout(ncol=1)
 
-# & theme( legend.title = element_text(size =10),
-#                                          legend.text = element_text(size = 8),
-#                                          legend.key.size = unit(4, "cm"),
-#                                          legend.key.height = unit(1, "cm"),  
-#                                          legend.key.width = unit(1, "cm"),
-#                                          axis.text.y=element_text(size=3),
-#                                          plot.title=element_text(size=10)
-#                                          )
 
 ```
 
